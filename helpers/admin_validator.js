@@ -20,3 +20,15 @@ exports.validateCategoryUpdate = [
 exports.validateCategoryDelete = [
   check("category_id", "Category id is required").notEmpty(),
 ];
+exports.validatePostAdd = [
+  check("title", "Title is required").notEmpty(),
+  check("description", "Description is required").notEmpty(),
+];
+exports.validatePostUpdate = [
+  check("post_id", "Post id is required").notEmpty(),
+  check("title", "Title is required").notEmpty(),
+  check("description", "Description is required").notEmpty(),
+];
+exports.validatePostDelete = [
+  check("post_id", "Post id is required").notEmpty(),
+];
