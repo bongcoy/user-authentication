@@ -10,8 +10,8 @@ const addPost = async (req, res) => {
         .status(400)
         .json({success: false, msg: "Errors", errors: errors.array()});
     }
-    const {title, content, category_id} = req.body;
-    const post = new Post({title, content, category_id});
+    const {title, description, category_id} = req.body;
+    const post = new Post({title, description, category_id});
     const postData = await post.save();
     return res.status(201).json({
       success: true,
