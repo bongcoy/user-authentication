@@ -10,13 +10,17 @@ const addPost = async (req, res) => {
         .status(400)
         .json({success: false, msg: "Errors", errors: errors.array()});
     }
-    const {title, description, category_id} = req.body;
-    const post = new Post({title, description, category_id});
+    const {title, description, categories} = req.body;
+    const post = new Post({title, description, categories});
     const postData = await post.save();
+    // Populate the categories field
+    const postFullData = await Post.findById(postData._id).populate(
+      "categories",
+    );
     return res.status(201).json({
       success: true,
       msg: "Post created successfully",
-      data: postData,
+      data: postFullData,
     });
   } catch (error) {
     res.status(400).send(error);
