@@ -1,5 +1,6 @@
 const {check} = require("express-validator");
 
+// Permission Validator
 exports.validatePermissionAdd = [
   check("permission_name", "Permission name is required").notEmpty(),
 ];
@@ -10,6 +11,8 @@ exports.validatePermissionUpdate = [
 exports.validatePermissionDelete = [
   check("permission_id", "Permission id is required").notEmpty(),
 ];
+
+// Category Validator
 exports.validateCategoryAdd = [
   check("category_name", "Category name is required").notEmpty(),
 ];
@@ -20,6 +23,8 @@ exports.validateCategoryUpdate = [
 exports.validateCategoryDelete = [
   check("category_id", "Category id is required").notEmpty(),
 ];
+
+// Post Validator
 exports.validatePostAdd = [
   check("title", "Title is required").notEmpty(),
   check("description", "Description is required").notEmpty(),
