@@ -44,14 +44,15 @@ const updatePost = async (req, res) => {
         .status(400)
         .json({success: false, msg: "Errors", errors: errors.array()});
     }
-    const {post_id, title, content, category_id} = req.body;
+    const {post_id, title, description, categories} = req.body;
     const post = await Post.findById(post_id);
     if (!post) {
       return res.status(400).json({success: false, msg: "Post not found"});
     }
+    var obj = {title, description, categories};
     const postData = await Post.findByIdAndUpdate(
       post_id,
-      {title, content, category_id},
+      {$set: obj},
       {new: true},
     );
     return res.status(200).json({
