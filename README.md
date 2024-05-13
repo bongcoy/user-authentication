@@ -4,7 +4,7 @@
 
 - [About](#about)
 - [Pre-requisites](#pre-requisites)
-- [Getting Started](#getting_started)
+- [Getting Started](#getting-started)
 
 ## About <a name = "about"></a>
 
