@@ -37,3 +37,18 @@ exports.validatePostUpdate = [
 exports.validatePostDelete = [
   check("post_id", "Post id is required").notEmpty(),
 ];
+
+// Role Validator
+exports.validateRoleAdd = [
+  check("role_name", "Role name is required").notEmpty(),
+  check("value", "Value is required").notEmpty(),
+];
+exports.validateRoleUpdate = [
+  check("role_id", "Role id is required").notEmpty(),
+  check("role_name", "Role name is required").notEmpty(),
+  check("value", "Value is required").notEmpty(),
+  check("permissions", "Permissions is required").notEmpty(),
+];
+exports.validateRoleDelete = [
+  check("role_id", "Role id is required").notEmpty(),
+];
