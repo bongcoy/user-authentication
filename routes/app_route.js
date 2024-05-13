@@ -9,6 +9,7 @@ const {
 } = require("../helpers/admin_validator");
 
 const categoryController = require("../controllers/category_controller");
+const postController = require("../controllers/post_controller");
 
 // Category Routes
 app.post(
@@ -36,17 +37,17 @@ app.post(
 );
 
 // Post Routes
-app.post("/add-post", authMiddleware.vervifyToken, categoryController.addPost);
-app.get("/get-posts", authMiddleware.vervifyToken, categoryController.getPosts);
+app.post("/add-post", authMiddleware.vervifyToken, postController.addPost);
+app.get("/get-posts", authMiddleware.vervifyToken, postController.getPosts);
 app.post(
   "/update-post",
   authMiddleware.vervifyToken,
-  categoryController.updatePost,
+  postController.updatePost,
 );
 app.post(
   "/delete-post",
   authMiddleware.vervifyToken,
-  categoryController.deletePost,
+  postController.deletePost,
 );
 
 module.exports = app; // Export app for other modules to use
