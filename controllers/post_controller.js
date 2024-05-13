@@ -29,10 +29,10 @@ const addPost = async (req, res) => {
 
 const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find();
+    const posts = await Post.find().populate("categories");
     return res.status(200).json({success: true, data: posts});
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send({success: false, msg: "Error", error});
   }
 };
 
@@ -60,7 +60,7 @@ const updatePost = async (req, res) => {
       data: postData,
     });
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send({success: false, msg: "Error", error});
   }
 };
 
@@ -82,7 +82,7 @@ const deletePost = async (req, res) => {
       .status(200)
       .json({success: true, msg: "Post deleted successfully"});
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send({success: false, msg: "Error", error});
   }
 };
 
