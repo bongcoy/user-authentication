@@ -10,9 +10,11 @@ const {
   validatePostUpdate,
   validatePostDelete,
 } = require("../helpers/admin_validator");
+const {validateUserAdd} = require("../helpers/auth_validator");
 
 const categoryController = require("../controllers/category_controller");
 const postController = require("../controllers/post_controller");
+const userController = require("../controllers/user_controller");
 
 // Category Routes
 app.post(
@@ -58,6 +60,14 @@ app.post(
   authMiddleware.vervifyToken,
   validatePostDelete,
   postController.deletePost,
+);
+
+// User Routes
+app.post(
+  "/add-user",
+  authMiddleware.vervifyToken,
+  validateUserAdd,
+  userController.addUser,
 );
 
 module.exports = app; // Export app for other modules to use
