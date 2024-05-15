@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const randomstring = require("randomstring");
 
 const User = require("../models/user");
+const {sendMail} = require("../helpers/mailer");
 
 // Add User
 const addUser = async (req, res) => {
@@ -43,6 +44,39 @@ const addUser = async (req, res) => {
 
     console.log("Password: ", stringGenerate);
 
+    const htmlContent = `<p>Hello ${savedUser.name},</p>
+    <p>Your account has been created successfully.</p>
+    <table> 
+        <tr>
+            <td>Name:</td>
+            <td>${name}</td>
+        </tr>
+        <tr>
+            <td>Email:</td>
+            <td>${email}</td>
+        </tr>
+        <tr>
+            <td>Password:</td>
+            <td>${stringGenerate}</td>
+        </tr>
+    </table>
+    <p>Now you can login to our app. Thank you for registering with us.</p>
+    <p>Regards,</p>
+    <p>Team</p>`;
+
+    const sendResult = await sendMail(
+      email,
+      "User Registration",
+      "User Registration",
+      htmlContent,
+    );
+
+    if (sendResult instanceof Error) {
+      return res
+        .status(500)
+        .json({success: false, msg: "Error sending email", error: sendResult});
+    }
+
     return res
       .status(201)
       .json({success: true, msg: "User added successfully", data: savedUser});
@@ -51,4 +85,75 @@ const addUser = async (req, res) => {
   }
 };
 
-module.exports = {addUser};
+const getUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    return res.status(200).json({success: true, data: users});
+  } catch (error) {
+    return res.status(500).json({success: false, msg: "Server Error", error});
+  }
+};
+
+const updateUser = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res
+        .status(400)
+        .json({success: false, msg: "Errors", errors: errors.array()});
+    }
+
+    const {id, name, email, role} = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({success: false, msg: "User not found"});
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      {
+        name,
+        email,
+        role,
+      },
+      {new: true},
+    );
+
+    return res.status(200).json({
+      success: true,
+      msg: "User updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    return res.status(500).json({success: false, msg: "Server Error", error});
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res
+        .status(400)
+        .json({success: false, msg: "Errors", errors: errors.array()});
+    }
+
+    const {id} = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({success: false, msg: "User not found"});
+    }
+
+    await User.findByIdAndDelete(id);
+
+    return res
+      .status(200)
+      .json({success: true, msg: "User deleted successfully"});
+  } catch (error) {
+    return res.status(500).json({success: false, msg: "Server Error", error});
+  }
+};
+
+module.exports = {addUser, getUsers, updateUser, deleteUser};
