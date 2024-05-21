@@ -2,34 +2,55 @@ const User = require("../models/user");
 const {validationResult} = require("express-validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const Permission = require("../models/permission");
+const UserPermission = require("../models/userPermission");
 
 const register = async (req, res) => {
   try {
-    console.log("register");
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res
         .status(400)
         .json({success: false, msg: "Errors", errors: errors.array()});
     }
-    console.log("register2");
+
     const {name, email, password} = req.body;
     const user = await User.findOne({email});
+
     if (user) {
-      console.log("register3");
       return res
         .status(400)
         .json({success: false, msg: "Email already exists"});
     }
-    console.log("register4");
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({name, email, password: hashedPassword});
     const userData = await newUser.save();
+
+    // Add user default permission
+    const defaultPermissions = await Permission.find({is_default: true});
+
+    if (defaultPermissions.length > 0) {
+      const permissions = [];
+      defaultPermissions.forEach(async (permission) => {
+        permissions.push({
+          permission_name: permission.permission_name,
+          permission_value: [0, 1, 2, 3],
+        });
+        console.log("permissions", permissions);
+      });
+      const userPermission = new UserPermission({
+        user_id: userData._id,
+        permissions,
+      });
+      await userPermission.save();
+    }
+
     return res
       .status(201)
       .json({success: true, msg: "User created successfully", data: userData});
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send({success: false, msg: "Error", error});
   }
 };
 
