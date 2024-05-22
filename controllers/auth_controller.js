@@ -102,7 +102,7 @@ const login = async (req, res) => {
       {
         $addFields: {
           permissions: {
-            permission: "$permissions.permissions",
+            permissions: "$permissions.permissions",
           },
         },
       },
