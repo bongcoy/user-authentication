@@ -72,19 +72,55 @@ const login = async (req, res) => {
       return res.status(400).json({success: false, msg: "Invalid password"});
     }
     const token = await generateToken(user);
+
+    // get user data with all permissions
+    const result = await User.aggregate([
+      {$match: {_id: user._id}},
+      {
+        $lookup: {
+          from: "userpermissions",
+          localField: "_id",
+          foreignField: "user_id",
+          as: "permissions",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          email: 1,
+          role: 1,
+          permissions: {
+            $cond: {
+              if: {$isArray: "$permissions"},
+              then: {$arrayElemAt: ["$permissions", 0]},
+              else: null,
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          permissions: {
+            permission: "$permissions.permissions",
+          },
+        },
+      },
+    ]);
+
     return res.status(200).json({
       success: true,
       msg: "Login successful",
       accessToken: token,
       tokenType: "Bearer",
-      data: user,
+      data: result,
     });
   } catch (error) {
     res.status(400).send(error);
   }
 };
 
-const generateToken = (user) => {
+const generateToken = async (user) => {
   return jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: "2h"});
 };
 
