@@ -1,8 +1,11 @@
 const {validationResult} = require("express-validator");
 const bcrypt = require("bcrypt");
 const randomstring = require("randomstring");
+const mongoose = require("mongoose");
 
 const User = require("../models/user");
+const Permission = require("../models/permission");
+const UserPermission = require("../models/user_permission");
 const {sendMail} = require("../helpers/mailer");
 
 // Add User
@@ -42,6 +45,30 @@ const addUser = async (req, res) => {
 
     const savedUser = await user.save();
 
+    // add permission to user
+    if (req.body.permissions != undefined && req.body.permissions.length > 0) {
+      const permissionArray = [];
+
+      const addPermission = req.body.permissions.map(async (permission) => {
+        const permissionData = await Permission.findOne({_id: permission.id});
+        if (permissionData) {
+          permissionArray.push({
+            permission_name: permissionData.permission_name,
+            permission_value: permission.values,
+          });
+        }
+      });
+
+      await Promise.all(addPermission);
+
+      const userPermission = new UserPermission({
+        user_id: savedUser._id,
+        permissions: permissionArray,
+      });
+
+      await userPermission.save();
+    }
+
     console.log("Password: ", stringGenerate);
 
     const htmlContent = `<p>Hello ${savedUser.name},</p>
@@ -67,7 +94,7 @@ const addUser = async (req, res) => {
     const sendResult = await sendMail(
       email,
       "User Registration",
-      "User Registration",
+      "User Registered",
       htmlContent,
     );
 
@@ -87,7 +114,40 @@ const addUser = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    // const users = await User.find();
+    const users = await User.aggregate([
+      {$match: {_id: {$ne: new mongoose.Types.ObjectId(req.user._id)}}},
+      {
+        $lookup: {
+          from: "userpermissions",
+          localField: "_id",
+          foreignField: "user_id",
+          as: "permissions",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          email: 1,
+          role: 1,
+          permissions: {
+            $cond: {
+              if: {$isArray: "$permissions"},
+              then: {$arrayElemAt: ["$permissions", 0]},
+              else: null,
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          permissions: {
+            permissions: "$permissions.permissions",
+          },
+        },
+      },
+    ]);
     return res.status(200).json({success: true, data: users});
   } catch (error) {
     return res.status(500).json({success: false, msg: "Server Error", error});
