@@ -3,7 +3,7 @@ const {validationResult} = require("express-validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Permission = require("../models/permission");
-const UserPermission = require("../models/userPermission");
+const UserPermission = require("../models/user_permission");
 
 const register = async (req, res) => {
   try {
